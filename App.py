@@ -187,16 +187,20 @@ def addSamplerJob():
         print("Audit type: " + str(config['audit_type']) )
         print("Audit config: " + str(config) )
 
-        if config['audit_type'] == 'existing_audit':
-            (rounds , auditJob) = config['auditJob'].split(",")
-            config['data_dir'] =  auditJob
-            print("New config: " + str(config))
+
 
         print("Config: "+str(config))
         config['job_id'] = lastJobId
         config['user_id'] = session['user_id']
         config['status'] = 'submitted'
-        save_output(config)
+
+        if config['audit_type'] == 'existing_audit':
+            (rounds , ballots,  auditJob) = config['auditJob'].split(",")
+            config['data_dir'] =  auditJob
+            print("New config: " + str(config))
+            save_output(config,  rounds=rounds, ballots=ballots, data=auditJob )
+        else:
+            save_output(config)
         run_queue.put(config)
         print( "Job submitted with ID: %d" % lastJobId)
         return redirect(url_for('showUserPortal'))
@@ -219,6 +223,8 @@ def addJob():
         print("File: " + str(file))
         uploadFileName = ""
         print("Config: " +str(config))
+        config['user_id'] = session['user_id']
+        config['status'] = 'submitted'
 
         if config['ballot_type'] == 'upload_ballots':
             print("Config sampler job: " + str( config['samplerJob']))
@@ -226,25 +232,30 @@ def addJob():
             print(sjString)
             shortened = sjString[1:-1]
             print(shortened)
-            (rounds , samplerJob) = shortened.split(",")
+            (seed, increment, rounds, ballots, samplerJob) = shortened.split(",")
             rounds = rounds.strip().strip()[1:-1]
+            ballots = ballots.strip().strip()[1:-1]
             samplerJob = samplerJob.strip()[1:-1]
+            seed = seed.strip()[1:-1]
+            increment = increment.strip()[1:-1]
+            config['seed'] = seed
+            config['incrementSize'] = increment
             print("Rounds: " + str(rounds))
             print("SamplerJob: " + str(samplerJob.strip()))
             config['data_dir'] =  samplerJob
             uploadFileName = os.path.join(OUTPUT_DIR ,  samplerJob , "sample_ballots.csv") #"rounds/round_"+rounds+".csv")
 
-        print("Config: "+str(config))
-        if file.filename != '' and file and allowed_file(file.filename):
-            print("Upload filename: " + str(uploadFileName))
-            filename =  secure_filename(file.filename) if uploadFileName == "" else uploadFileName
-            print("Using filename: " + str(filename))
-            #TODO: (zperumal) rename file
-            file.save(uploadFileName)
-            config['file'] = uploadFileName
-        config['user_id'] = session['user_id']
-        config['status'] = 'submitted'
-        save_output(config)
+            print("Config: "+str(config))
+            if file.filename != '' and file and allowed_file(file.filename):
+                print("Upload filename: " + str(uploadFileName))
+                filename =  secure_filename(file.filename) if uploadFileName == "" else uploadFileName
+                print("Using filename: " + str(filename))
+                #TODO: (zperumal) rename file
+                file.save(uploadFileName)
+                config['file'] = uploadFileName
+            save_output(config, rounds=rounds, ballots=ballots, data=samplerJob)
+        else:
+            save_output(config)
         run_queue.put(config)
         print( "Job submitted with ID: %d" % lastJobId)
         return redirect(url_for('showUserPortal'))
@@ -255,8 +266,7 @@ def empty_queue():
     while True:
         config = run_queue.get()
         #config = getNextJob()
-        print("CONFIG: " + str(config))
-
+        print("EMPTY QUEUE CONFIG: " + str(config))
         if config is not None:
             current_job_id = config['job_id']
             try:
@@ -270,7 +280,7 @@ def empty_queue():
                         output_info = run_aus_audit(config,data_dir=os.path.join(OUTPUT_DIR ,  data_dir))
                     else:
                         output_info = run_aus_audit(config)
-                    print("OUTPUT INFO: " + str(output_info))
+                    print("EMPTY QUEUE OUTPUT INFO: " + str(output_info))
                     update_job(job_id=current_job_id, status='completed' , rounds=output_info['audit_stage'], ballots=output_info['sample_size'])
                 else:
                     print("here")
@@ -280,7 +290,7 @@ def empty_queue():
                         output_info = run_aus_sampler(config,data_dir=os.path.join(OUTPUT_DIR ,  data_dir))
                     else:
                         output_info = run_aus_sampler(config)
-                    print("OUTPUT INFO m: " + str(output_info))
+                    print("EMPTY QUEUE OUTPUT INFO m: " + str(output_info))
                     update_job(job_id=current_job_id, status='completed' , rounds=output_info['audit_stage'], ballots=output_info['sample_size'])
                 #save_output(config, job_id = str(current_job_id), rounds=output_info['audit_stage'], ballots=output_info['sample_size'])
             except:
@@ -301,7 +311,7 @@ def save_output(run_config,  rounds='', ballots ='', data=''):
         _seed = run_config['seed'] if 'seed' in run_config  else ''
         _increment = run_config['incrementSize']  if 'incrementSize' in run_config else ''
         _data = data if data != '' else _type+"_"+str(_job_id)
-
+        print("SAVE OUTPUT: " + str((_job_id,_user_id,_job_name, _type,_status, _state,_seed,_increment,  rounds,ballots, _data)))
         cursor.callproc('addJob', (_job_id,_user_id,_job_name, _type,_status, _state,_seed,_increment,  rounds,ballots, _data))
         conn.commit()
 
@@ -433,4 +443,4 @@ if __name__ == "__main__":
     t = Thread(target=empty_queue, args=())
     t.setDaemon(True)
     t.start()
-    app.run()
+    app.run(host='0.0.0.0')

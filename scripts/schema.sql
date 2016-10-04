@@ -1,4 +1,3 @@
-
 CREATE DATABASE ASAFrontend; 
 
 
@@ -48,10 +47,11 @@ CREATE TABLE `ASAFrontend`.`output_data` (
   `job_type` VARCHAR(200) NULL,
   `state` VARCHAR(200) NULL,
   `seed` VARCHAR(200) NULL,
+  `status` VARCHAR(200) NULL,
   `increment` VARCHAR(200) NULL,
   `rounds` VARCHAR(200) NULL,
   `ballots` VARCHAR(200) NULL,
-  `data` VARCHAR(200) NULL,
+  `job_data` VARCHAR(200) NULL,
   PRIMARY KEY (`job_id`)); 
 
 use ASAFrontend;
@@ -61,6 +61,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `addJob`(
     IN p_user_id VARCHAR(200),
     IN p_job_name VARCHAR(200),
     IN p_job_type VARCHAR(200),
+    IN p_status VARCHAR(200),
     IN p_state VARCHAR(200),
     IN p_seed VARCHAR(200),
     IN p_increment VARCHAR(200),
@@ -76,6 +77,7 @@ BEGIN
             user_id,
             job_name,
             job_type,
+            status,
             state,
             seed,
             increment,
@@ -89,6 +91,7 @@ BEGIN
             p_user_id,
             p_job_name,
             p_job_type,
+            p_status,
             p_state,
             p_seed,
             p_increment,

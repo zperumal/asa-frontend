@@ -15,7 +15,6 @@
 
     <script src="../static/js/jquery-1.11.2.js"></script>
     <script src="../static/js/runAuditJob.js"></script>
-    <script src="../static/js/runSamplerJob.js"></script>
 
 </head>
   <body>
@@ -37,25 +36,23 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-        <form action="addSamplerJob" id="addJob" method="post" name="addJob" enctype=multipart/form-data>
-        Sampler Job name: <input type="text" name="name"><br>
-
-           New Audit Job<input checked name='audit_type' onclick="hideDiv()"
-        type='radio' value="new_audit"> Existing Audit Job <input name=
-        'audit_type' onclick="showDiv()" type='radio' value=
-        "existing_audit">
-            <br>
-        <div id="existingOrNew" style="display:none">
-            Audit Job: <br>
-            <select name="auditJob">
-            {% for audit_name in auditNames %}
-                <option value="{{audit_name[8] ,audit_name[9] ,audit_name[10] }}">{{ audit_name[2] }}</option>
+        <form action="addJob" id="addJob" method="post" name="addJob" enctype=multipart/form-data>
+        Job name: <input type="text" name="name"><br>
+        Audit type:<br>
+        Existing ballots<input checked name='ballot_type' onclick="hideDiv()"
+        type='radio' value="existing_ballots"> Upload ballots <input name=
+        'ballot_type' onclick="showDiv()" type='radio' value=
+        "upload_ballots"><br>
+        <div id="uploadDiv" style="display:none">
+            Select ballot data to upload: <input  name=
+            "ballotsToUpload" type="file"> <br>
+            Sampler Job: <br>
+            <select name="samplerJob">
+            {% for sampler_name in samplerNames %}
+                <option value="{{ sampler_name[5],sampler_name[7] ,sampler_name[8] ,sampler_name[9] ,sampler_name[10]  }}">{{ sampler_name[2] }}</option>
             {% endfor %}
             </select>
         </div>
-
-        Random Seed: <input type="text" name="seed"><br>
-        Audit increment size: <input type="number" name="incrementSize"><br>
             State:<br>
         <select  name="state">
             <option value="ACT">
@@ -80,8 +77,13 @@
                 WA
             </option>
         </select><br>
-        <input name="type" type="text" value="sampler"  hidden>
-        <input id="btnRunJob" type="submit" value="Run Sampler">
+
+            <div id="seedIncDiv" >
+        Random Seed: <input type="text" name="seed"><br>
+        Audit increment size: <input type="number" name="incrementSize"><br>
+                </div>
+        <input name="type" type="text" value="audit"  hidden>
+        <input id="btnRunJob" type="submit" value="Run Audit">
       </form>
 
           <span id="messageSpan">  </span>
