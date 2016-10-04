@@ -14,7 +14,8 @@
     <link href="../static/css/jumbotron-narrow.css" rel="stylesheet">
 
     <script src="../static/js/jquery-1.11.2.js"></script>
-    <script src="../static/js/signIn.js"></script>
+    <script src="../static/js/runAuditJob.js"></script>
+    <script src="../static/js/runSamplerJob.js"></script>
 
 </head>
   <body>
@@ -26,9 +27,7 @@
                     </li>
                 </ul>
                 <ul class="nav nav-pills pull-right">
-                    <li role="presentation"><a href="showSignIn">Sign In</a>
-                    </li>
-                    <li role="presentation"><a href="showSignUp">Sign Up</a>
+                    <li role="presentation"><a href="logout">Log Out</a>
                     </li>
                 </ul>
             </nav>
@@ -38,16 +37,54 @@
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-        <form class="form-signin">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password" required>
+        <form action="addSamplerJob" id="addJob" method="post" name="addJob" enctype=multipart/form-data>
+        Sampler Job name: <input type="text" name="name"><br>
 
-        <button id="signInBtn" class="btn btn-lg btn-primary btn-block" type="button">Sign in</button>
-            <span id="messageSpan">  </span>
+           New Audit Job<input checked name='audit_type' onclick="hideDiv()"
+        type='radio' value="new_audit"> Existing Audit Job <input name=
+        'audit_type' onclick="showDiv()" type='radio' value=
+        "existing_audit">
+            <br>
+        <div id="existingOrNew" style="display:none">
+            Audit Job: <br>
+            <select name="auditJob">
+            {% for audit_name in auditNames %}
+                <option value="{{audit_name[8] ,audit_name[10] }}">{{ audit_name[2] }}</option>
+            {% endfor %}
+            </select>
+        </div>
+
+        Random Seed: <input type="text" name="seed"><br>
+        Audit increment size: <input type="number" name="incrementSize"><br>
+            State:<br>
+        <select  name="state">
+            <option value="ACT">
+                ACT
+            </option>
+            <option value="NSW">
+                NSW
+            </option>
+            <option value="NT">
+                NT
+            </option>
+            <option value="QLD">
+                QLD
+            </option>
+            <option value="TAS">
+                TAS
+            </option>
+            <option value="VIC">
+                VIC
+            </option>
+            <option value="WA">
+                WA
+            </option>
+        </select><br>
+        <input name="type" type="text" value="sampler"  hidden>
+        <input id="btnRunJob" type="submit" value="Run Sampler">
       </form>
+
+          <span id="messageSpan">  </span>
     </div>
 
 

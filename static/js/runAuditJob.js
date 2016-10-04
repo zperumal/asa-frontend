@@ -1,20 +1,24 @@
 /**
- * Created by zaraperumal on 9/9/16.
+ * Created by zaraperumal on 9/10/16.
  */
+function hideDiv() {
+    document.getElementById('uploadDiv').style.display = "none";
+    }
+function showDiv() {
+    document.getElementById('uploadDiv').style.display = "block";
+    }
+
 $(function() {
-    $('#signInBtn').click(function() {
+    $('#btnRunJob').click(function() {
 
         $.ajax({
-            url: '/signIn',
+            url: '/addJob',
             data: $('form').serialize(),
             type: 'POST',
             success: function(response) {
-                document.getElementById("messageSpan").innerHTML=response;
-                location.href = "showUserPortal"
                 console.log(response);
             },
             error: function(error) {
-                document.getElementById("messageSpan").innerHTML=error;
                 console.log(error);
             }
         });
